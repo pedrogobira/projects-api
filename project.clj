@@ -7,6 +7,7 @@
                  [javax.servlet/servlet-api "2.5"]
                  [ring "1.10.0"]
                  [metosin/reitit "0.7.0-alpha4"]
-                 [metosin/muuntaja "0.6.8"]]
+                 [metosin/muuntaja "0.6.8"]
+                 [com.datomic/datomic-free "0.9.5697"]]
   :repl-options {:init-ns app.core}
   :main "app.core")
