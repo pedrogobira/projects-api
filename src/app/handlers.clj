@@ -2,17 +2,22 @@
   (:require [app.projects.database :as database]))
 
 (defn create-project [{project :body-params}]
-  (let [id (str (java.util.UUID/randomUUID))
-        projects (->> (assoc project :id id)
-                      (swap! database/projects assoc id))]
-    {:status 200
-     :body projects}))
+  (database/create-project (let [id (str (java.util.UUID/randomUUID))] (assoc project :id id)))
+  {:status 201})
 
 (defn get-projects [_]
   {:status 200
-   :body @database/projects})
+   :body   (database/all-projects)})
+
 
 (defn get-project-by-id
   [{{id :id} :path-params}]
   {:status 200
-   :body (get @database/projects id)})
+   :body   (database/get-project-by-id id)})
+
+(comment (defn create-project [{project :body-params}]
+           (let [id (str (java.util.UUID/randomUUID))
+                 result (->> (assoc project :id id)
+                             (database/create-project))]
+             {:status 201}))
+         )
