@@ -1,5 +1,6 @@
 (ns app.projects.database
-  (:require [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            [clojure.java.io :as io]))
 
 (def db-uri "datomic:mem://foo")
 
@@ -23,15 +24,12 @@
 
 @(d/transact conn project-schema)
 
-(comment (def first-projects [{:project/title           "Project 1"
+(def first-projects [{:project/title           "Project 1"
                                :project/people-quantity 10}
                               {:project/title           "Project 2"
                                :project/people-quantity 15}
                               {:project/title           "Project 3"
-                               :project/people-quantity 20}]))
-
-(comment
-  @(d/transact conn first-projects))
+                               :project/people-quantity 20}])
 
 (defn parse-projects [results]
   (apply concat
@@ -68,6 +66,21 @@
 (defn todos-os-projetos [db]
   (d/q '[:find (pull ?entidade [*])
          :where [?entidade :project/title]] db))
+
+(comment
+  @(d/transact conn first-projects)
+  (println (todos-os-projetos (d/db conn)))
+  (defn teste [id-entidade]
+    @(d/transact conn [[:db/add id-entidade :project/title "inovar meu amor"]
+                       [:db/add id-entidade :project/people-quantity 99]] ))
+  (teste 17592186045418)
+  (println (todos-os-projetos (d/db conn)))
+  )
+
+(defn update-quantity-by-id [id quantity]
+  @(d/transact conn [[:db/add id :project/title quantity]] ))
+(defn update-title-by-id [id title]
+  @(d/transact conn [[:db/add id :project/title title]] ))
 
 ;db/add passando a entidade , atributo e valor a ser adicionado/ou mudado.
 ;:db/add 17592186045419 :project/people-quantity 9
