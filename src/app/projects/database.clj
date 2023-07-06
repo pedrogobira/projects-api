@@ -76,11 +76,14 @@
   (teste 17592186045418)
   (println (todos-os-projetos (d/db conn)))
   )
-
+;db/add passando a entidade , atributo e valor a ser adicionado/ou mudado.
+;:db/add 17592186045419 :project/people-quantity 9
 (defn update-quantity-by-id [id quantity]
   @(d/transact conn [[:db/add id :project/title quantity]] ))
 (defn update-title-by-id [id title]
   @(d/transact conn [[:db/add id :project/title title]] ))
 
-;db/add passando a entidade , atributo e valor a ser adicionado/ou mudado.
-;:db/add 17592186045419 :project/people-quantity 9
+(defn delete-title-by-id [id title]
+  @(d/transact conn [[:db/retract id :project/title title]] ))
+(defn delete-quantity-by-id [id quantity]
+  @(d/transact conn [[:db/retract id :project/people-quantity quantity]] ))
