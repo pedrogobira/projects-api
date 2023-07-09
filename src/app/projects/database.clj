@@ -33,11 +33,11 @@
 
 (defn parse-projects [results]
   (apply concat
-         (map (fn [[title quantity]]
-                [{:title title :quantity quantity}])
+         (map (fn [[id title quantity]]
+                [{:id id :title title :quantity quantity}])
               results)))
 
-(defn all-projects [] (let [query '[:find ?title ?quantity
+(defn all-projects [] (let [query '[:find ?p ?title ?quantity
                                     :where
                                     [?p :project/title ?title]
                                     [?p :project/people-quantity ?quantity]]]
@@ -52,7 +52,7 @@
 
 (defn get-project-by-title [title]
 
-  (let [query '[:find ?title ?people-quantity
+  (let [query '[:find ?p ?title ?people-quantity
                 :in $ ?title
                 :where
                 [?p :project/title ?title]
@@ -61,13 +61,37 @@
     (parse-projects result)
     ))
 
+(defn get-project-by-id [id]
+  (let [query '[:find ?id ?title ?people-quantity
+                :in $ ?id
+                :where
+                [?id :project/title ?title]
+                [?id :project/people-quantity ?people-quantity]]
+        result (d/q query (d/db conn) id)]
+    (parse-projects result)
+    ))
 
-; pull generico, vantagem preguica, desvantagem pode trazer mais do que eu queira
-(defn todos-os-projetos [db]
-  (d/q '[:find (pull ?entidade [*])
-         :where [?entidade :project/title]] db))
+(defn get-title-by-id [id]
+  (let [query '[:find [?title]
+                :in $ ?id
+                :where
+                [?id :project/title ?title]]
+        result (d/q query (d/db conn) id)]
+    (first result)))
 
+(defn get-quantity-by-id [id]
+  (let [query '[:find [?quantity]
+                :in $ ?id
+                :where
+                [?id :project/people-quantity ?quantity]]
+        result (d/q query (d/db conn) id)]
+    (first result)))
 (comment
+  ; pull generico, vantagem preguica, desvantagem pode trazer mais do que eu queira
+  (defn todos-os-projetos [db]
+    (d/q '[:find (pull ?entidade [*])
+           :where [?entidade :project/title]] db))
+
   @(d/transact conn first-projects)
   (println (todos-os-projetos (d/db conn)))
   (defn teste [id-entidade]
@@ -75,15 +99,20 @@
                        [:db/add id-entidade :project/people-quantity 99]] ))
   (teste 17592186045418)
   (println (todos-os-projetos (d/db conn)))
+  (defn delete-title-by-id [id title]
+    @(d/transact conn [[:db/retract id :project/title title]] ))
+  (defn delete-quantity-by-id [id quantity]
+    @(d/transact conn [[:db/retract id :project/people-quantity quantity]] ))
   )
-;db/add passando a entidade , atributo e valor a ser adicionado/ou mudado.
-;:db/add 17592186045419 :project/people-quantity 9
 (defn update-quantity-by-id [id quantity]
   @(d/transact conn [[:db/add id :project/title quantity]] ))
 (defn update-title-by-id [id title]
   @(d/transact conn [[:db/add id :project/title title]] ))
 
-(defn delete-title-by-id [id title]
-  @(d/transact conn [[:db/retract id :project/title title]] ))
-(defn delete-quantity-by-id [id quantity]
-  @(d/transact conn [[:db/retract id :project/people-quantity quantity]] ))
+(d/transact conn first-projects)
+
+(defn delete-project-by-id [id]
+  @(d/transact conn [[:db/retract id :project/title (get-title-by-id id)]
+                     [:db/retract id :project/people-quantity (get-quantity-by-id id)]])
+  )
+;(delete-project-by-id 17592186045418)

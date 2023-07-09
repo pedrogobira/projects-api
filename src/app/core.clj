@@ -10,7 +10,8 @@
   (ring/ring-handler
    (ring/router
     ["/api/v1"
-     ["/projects/:title" handlers/get-project-by-title]
+     ["/projects/:id" {:get handlers/get-project-by-id
+                       :delete handlers/delete-project-by-id}]
      ["/projects" {:get handlers/get-projects
                    :post handlers/create-project}]]
     {:data {:muuntaja m/instance
