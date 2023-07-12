@@ -13,6 +13,7 @@
      ["/projects/:id" {:get handlers/get-project-by-id
                        :delete handlers/delete-project-by-id}]
      ["/projects" {:get handlers/get-projects
+                   :put handlers/update-project
                    :post handlers/create-project}]]
     {:data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware]}})))

@@ -17,8 +17,12 @@
 
 (defn delete-project-by-id
   [{{id :id} :path-params}]
-  {:status 200
-   :body   (database/delete-project-by-id id)}
+  (database/delete-project-by-id id)
+  {:status 200}
   )
 
+(defn update-project [{project :body-params}]
+  (database/update-project project)
+  {:status 200}
+  )
 

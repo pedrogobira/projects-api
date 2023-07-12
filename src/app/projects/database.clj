@@ -62,12 +62,14 @@
     ))
 
 (defn get-project-by-id [id]
+  (def id-long (Long/parseLong id))
+
   (let [query '[:find ?id ?title ?people-quantity
                 :in $ ?id
                 :where
                 [?id :project/title ?title]
                 [?id :project/people-quantity ?people-quantity]]
-        result (d/q query (d/db conn) id)]
+        result (d/q query (d/db conn) id-long)]
     (parse-projects result)
     ))
 
@@ -105,14 +107,20 @@
     @(d/transact conn [[:db/retract id :project/people-quantity quantity]] ))
   )
 (defn update-quantity-by-id [id quantity]
-  @(d/transact conn [[:db/add id :project/title quantity]] ))
+  @(d/transact conn [[:db/add id :project/people-quantity quantity]] ))
 (defn update-title-by-id [id title]
   @(d/transact conn [[:db/add id :project/title title]] ))
 
 (d/transact conn first-projects)
 
 (defn delete-project-by-id [id]
-  @(d/transact conn [[:db/retract id :project/title (get-title-by-id id)]
-                     [:db/retract id :project/people-quantity (get-quantity-by-id id)]])
+  (def id-long (Long/parseLong id))
+
+  @(d/transact conn [[:db/retract id-long :project/title (get-title-by-id id-long)]
+                     [:db/retract id-long :project/people-quantity (get-quantity-by-id id-long)]])
   )
-;(delete-project-by-id 17592186045418)
+
+(defn update-project [project]
+  @(d/transact conn [[:db/add (:id project) :project/people-quantity (:quantity project)]
+                     [:db/add (:id project) :project/title (:title project)]])
+  )
